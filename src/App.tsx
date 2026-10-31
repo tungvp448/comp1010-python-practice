@@ -4,6 +4,7 @@ import type { ActiveAttempt, AttemptConfig, Progress, Question } from './types';
 import { loadBank } from './lib/bank';
 import { applySubmission, createAttempt, gradeAttempt, isExpired, recordResult } from './lib/attempt';
 import { ACTIVE_KEY, PROGRESS_KEY, createStore, detectStorage } from './lib/storage';
+import { applyTheme, loadTheme, type Theme } from './lib/theme';
 import SetupPage from './components/SetupPage';
 import AttemptPage from './components/AttemptPage';
 import ResultPage from './components/ResultPage';
@@ -27,6 +28,11 @@ export default function App() {
   const [active, setActive] = useState<ActiveAttempt | null>(() => store.loadActive());
   const [view, setView] = useState<View>(() => (active ? { name: 'attempt' } : { name: 'setup' }));
   const [notices, setNotices] = useState<string[]>(() => store.notices.slice());
+  const [theme, setTheme] = useState<Theme>(loadTheme);
+  const changeTheme = (t: Theme) => {
+    setTheme(t);
+    applyTheme(t);
+  };
 
   // Refs mirror state so submit can be made idempotent even if called twice in one tick
   // (timer + visibilitychange, double click, StrictMode).
@@ -180,6 +186,16 @@ export default function App() {
           <button className={view.name === 'guide' ? 'navlink on' : 'navlink'} onClick={() => go({ name: 'guide' })}>
             Hướng dẫn
           </button>
+          <select
+            className="theme-select"
+            value={theme}
+            onChange={(e) => changeTheme(e.target.value as Theme)}
+            aria-label="Giao diện sáng/tối"
+          >
+            <option value="auto">Giao diện: theo hệ thống</option>
+            <option value="light">Giao diện: sáng</option>
+            <option value="dark">Giao diện: tối</option>
+          </select>
         </nav>
       </header>
 
